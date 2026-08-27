@@ -548,7 +548,7 @@
         }
         
         // ADMIN GAMES
-        function loadGames() {
+                function loadGames() {
             db.ref('games').once('value', snapshot => {
                 let html = '';
                 if (snapshot.exists()) {
@@ -556,7 +556,7 @@
                     Object.keys(games).sort((a,b) => parseInt(a) - parseInt(b)).forEach(id => {
                         const g = games[id];
                         const pwdNote = g.password ? ` | Password: ${g.password}` : ' | No password (like Game 2)';
-                        html += `<div class="item-box"><strong>Game ${id}</strong> (${g.weeks} weeks, ${g.players ? g.players.length : 0} players${pwdNote}) <button style="width: auto; padding: 8px 15px; font-size: 13px; background: #17a2b8; color: white; border: none; border-radius: 4px; cursor: pointer;" onclick="editGame('${id}')">Edit</button> <button class="btn-delete" onclick="deleteGame('${id}')">Delete</button></div>`;
+                        html += `<div class="item-box"><div><strong>Game ${id}</strong> (${g.weeks} weeks, ${g.players ? g.players.length : 0} players${pwdNote})</div><div><button onclick="editGame('${id}')" style="background: #17a2b8; color: white; border: none; border-radius: 4px; padding: 8px 15px; font-size: 13px; cursor: pointer; margin-right: 10px;">Edit</button><button class="btn-delete" onclick="deleteGame('${id}')">Delete</button></div></div>`;
                     });
                 }
                 document.getElementById('gamesList').innerHTML = html || 'No games yet';
