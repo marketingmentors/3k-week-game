@@ -40,7 +40,9 @@
         .info-bar p { color: #333; margin: 5px 0; font-size: 14px; }
         .admin-section { background: #f9f9f9; padding: 15px; margin: 15px 0; border-radius: 6px; border-left: 4px solid #C00418; }
         .item-box { background: #f0f0f0; padding: 10px; margin: 10px 0; border-radius: 4px; display: flex; justify-content: space-between; align-items: center; gap: 10px; }
-        .item-box > div:last-child { display: flex; gap: 10px; }        .btn-delete { background: #dc3545; width: auto; padding: 8px 15px; font-size: 13px; }
+        .item-box > div:first-child { flex: 1; }
+        .item-box > div:last-child { display: flex; flex-direction: row; gap: 10px; }
+        .btn-delete { background: #dc3545; width: auto; padding: 8px 15px; font-size: 13px; }        
         .btn-delete:hover { background: #c82333; }
         .table-wrapper { overflow-x: auto; }
         table { width: 100%; border-collapse: collapse; margin-top: 15px; font-size: 11px; }
