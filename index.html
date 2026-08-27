@@ -261,6 +261,8 @@
         
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
+        loadPlayerGames();
+        loadAdminGames();
         
         let playerGameId, playerName, playerWeeks;
         
