@@ -58,6 +58,7 @@
             input, select, button { font-size: 16px; padding: 14px !important; min-height: 44px !important; }
         }
         a { text-decoration: none; cursor: pointer; }
+        .password-note { font-size: 12px; color: #666; margin-top: 10px; font-style: italic; }
     </style>
 </head>
 <body>
@@ -74,16 +75,24 @@
                     <h2>Welcome</h2>
                     <div id="loginMsg" class="msg"></div>
                     
-                    <!-- PLAYER LOGIN -->
+                    <!-- GAME SELECTION -->
                     <div>
-                        <h3 style="margin-bottom: 15px; font-size: 16px;">Player Mode</h3>
-                        <p style="color: #666; font-size: 13px; margin-bottom: 15px;">Select your game and name</p>
+                        <h3 style="margin-bottom: 15px; font-size: 16px;">Select Your Game</h3>
                         <div class="form-group">
                             <label>Game Number</label>
-                            <select id="playerGameSelect" onchange="loadPlayerNames()">
+                            <select id="playerGameSelect" onchange="loadPlayerGameInfo()">
                                 <option value="">Select game</option>
                             </select>
                         </div>
+                        
+                        <!-- PASSWORD (Hidden for Game 2, shown for new games) -->
+                        <div id="passwordDiv" class="form-group" style="display: none;">
+                            <label>Game Password</label>
+                            <input type="password" id="gamePassword" placeholder="Enter game password">
+                            <div class="password-note">This game requires a password</div>
+                        </div>
+                        
+                        <!-- PLAYER NAME -->
                         <div class="form-group">
                             <label>Your Name</label>
                             <select id="playerNameSelect">
@@ -183,6 +192,11 @@
                             <input type="number" id="newGameNum" min="1">
                         </div>
                         <div class="form-group">
+                            <label>Game Password</label>
+                            <input type="text" id="newGamePassword" placeholder="e.g., Game3Pass">
+                            <div class="password-note">Leave empty for password-free game (like Game 2)</div>
+                        </div>
+                        <div class="form-group">
                             <label>Number of Weeks</label>
                             <input type="number" id="newGameWeeks" min="1" max="8" value="6">
                         </div>
@@ -196,6 +210,27 @@
                         <h3>Games</h3>
                         <div id="gamesList"></div>
                     </div>
+                    
+                    <!-- EDIT GAME SECTION (Hidden by default) -->
+                    <div id="editGameSection" class="admin-section" style="display: none; margin-top: 30px;">
+                        <h3>Edit Game <span id="editGameNum"></span></h3>
+                        <div class="form-group">
+                            <label>Number of Weeks</label>
+                            <input type="number" id="editGameWeeks" min="1" max="8" value="6">
+                        </div>
+                        <div class="form-group">
+                            <label>Game Password</label>
+                            <input type="text" id="editGamePassword" placeholder="Leave empty for password-free game">
+                            <div class="password-note">Leave empty to make this game password-free</div>
+                        </div>
+                        <div class="form-group">
+                            <label>Player Names (one per line)</label>
+                            <textarea id="editGamePlayers" rows="8" placeholder="Alice&#10;Bob&#10;Charlie"></textarea>
+                        </div>
+                        <button onclick="saveGameEdit()">Save Changes</button>
+                        <button onclick="cancelGameEdit()" style="margin-top: 10px; background: #6c757d;">Cancel</button>
+                    </div>
+                
                 </div>
                 
                 <!-- ADMIN ENTRY -->
@@ -255,6 +290,8 @@
 
     <script>
         const ADMIN_PASSWORD = "Mm@3kWeek$Game!!";
+        const GAME_2_PASSWORD = null; // Game 2 is password-free for backward compatibility
+        
         const firebaseConfig = {
             apiKey: "AIzaSyCnMlbwTUqkrJthbWhpVB7kn-Ef0VRu22o",
             databaseURL: "https://k-week-game-mm-default-rtdb.firebaseio.com"
@@ -265,7 +302,7 @@
         loadPlayerGames();
         loadAdminGames();
         
-        let playerGameId, playerName, playerWeeks;
+        let playerGameId, playerName, playerWeeks, playerGamePassword;
         
         // GENERAL
         function msg(id, text, type) {
@@ -292,6 +329,35 @@
             });
         }
         
+        function loadPlayerGameInfo() {
+            const gameId = document.getElementById('playerGameSelect').value;
+            const passwordDiv = document.getElementById('passwordDiv');
+            const passwordInput = document.getElementById('gamePassword');
+            
+            if (!gameId) {
+                passwordDiv.style.display = 'none';
+                document.getElementById('playerNameSelect').innerHTML = '<option value="">Select name</option>';
+                return;
+            }
+            
+            // Check if this game requires a password
+            db.ref('games/' + gameId).once('value', snapshot => {
+                if (snapshot.exists()) {
+                    const g = snapshot.val();
+                    
+                    // Show password field only if game has a password (not Game 2)
+                    if (g.password) {
+                        passwordDiv.style.display = 'block';
+                    } else {
+                        passwordDiv.style.display = 'none';
+                        passwordInput.value = '';
+                    }
+                    
+                    loadPlayerNames();
+                }
+            });
+        }
+        
         function loadPlayerNames() {
             const gameId = document.getElementById('playerGameSelect').value;
             const sel = document.getElementById('playerNameSelect');
@@ -314,19 +380,35 @@
         function playerLogin() {
             const gameId = document.getElementById('playerGameSelect').value;
             const name = document.getElementById('playerNameSelect').value;
-            if (!gameId || !name) { msg('loginMsg', 'Select game and name', 'err'); return; }
+            const enteredPassword = document.getElementById('gamePassword').value;
+            
+            if (!gameId || !name) { 
+                msg('loginMsg', 'Select game and name', 'err'); 
+                return; 
+            }
             
             db.ref('games/' + gameId).once('value', snapshot => {
                 if (snapshot.exists()) {
                     const g = snapshot.val();
+                    
+                    // Check password if game requires it
+                    if (g.password && g.password !== enteredPassword) {
+                        msg('loginMsg', 'Invalid password', 'err');
+                        return;
+                    }
+                    
                     playerGameId = gameId;
                     playerName = name;
                     playerWeeks = g.weeks;
+                    playerGamePassword = g.password || null;
+                    
                     document.getElementById('playerGameDisplay').textContent = gameId;
                     document.getElementById('playerNameDisplay').textContent = name;
                     loadPlayerWeeks();
                     loadPlayerDash();
                     showScreen('playerApp');
+                } else {
+                    msg('loginMsg', 'Game not found', 'err');
                 }
             });
         }
@@ -379,10 +461,13 @@
             playerGameId = null;
             playerName = null;
             playerWeeks = null;
+            playerGamePassword = null;
             clearPlayerFields();
             document.getElementById('adminPassword').value = '';
             document.getElementById('playerGameSelect').value = '';
             document.getElementById('playerNameSelect').value = '';
+            document.getElementById('gamePassword').value = '';
+            document.getElementById('passwordDiv').style.display = 'none';
             showScreen('login');
         }
         
@@ -400,7 +485,6 @@
             if (!week) { msg('playerEntryMsg', 'Select week', 'err'); return; }
             if (!db) { msg('playerEntryMsg', 'Firebase not ready', 'err'); return; }
             
-            // Helper function to parse value or return null if empty
             const parseOrNull = (val, isFloat = false) => {
                 const trimmed = val.trim();
                 if (trimmed === '') return null;
@@ -437,7 +521,8 @@
             document.getElementById('yeses').value = '';
             document.getElementById('dollars').value = '';
         }
-                function playerUpdateEntry() {
+        
+        function playerUpdateEntry() {
             playerSubmit();
         }
         
@@ -470,7 +555,8 @@
                     const games = snapshot.val();
                     Object.keys(games).sort((a,b) => parseInt(a) - parseInt(b)).forEach(id => {
                         const g = games[id];
-                        html += `<div class="item-box"><strong>Game ${id}</strong> (${g.weeks} weeks, ${g.players ? g.players.length : 0} players) <button class="btn-delete" onclick="deleteGame('${id}')">Delete</button></div>`;
+                        const pwdNote = g.password ? ` | Password: ${g.password}` : ' | No password (like Game 2)';
+                        html += `<div class="item-box"><strong>Game ${id}</strong> (${g.weeks} weeks, ${g.players ? g.players.length : 0} players${pwdNote}) <button style="width: auto; padding: 8px 15px; font-size: 13px; background: #17a2b8; color: white; border: none; border-radius: 4px; cursor: pointer;" onclick="editGame('${id}')">Edit</button> <button class="btn-delete" onclick="deleteGame('${id}')">Delete</button></div>`;
                     });
                 }
                 document.getElementById('gamesList').innerHTML = html || 'No games yet';
@@ -479,19 +565,30 @@
         
         function createGame() {
             const gameNum = document.getElementById('newGameNum').value;
+            const gamePassword = document.getElementById('newGamePassword').value.trim();
             const weeks = parseInt(document.getElementById('newGameWeeks').value);
             const players = document.getElementById('newGamePlayers').value.split('\n').map(p => p.trim()).filter(p => p);
             
-            if (!gameNum || weeks < 1 || players.length === 0) { msg('gamesMsg', 'Fill all fields', 'err'); return; }
+            if (!gameNum || weeks < 1 || players.length === 0) { 
+                msg('gamesMsg', 'Fill all fields', 'err'); 
+                return; 
+            }
             
-            const game = { weeks: weeks, players: players };
+            const game = { 
+                weeks: weeks, 
+                players: players,
+                password: gamePassword || null  // null if no password provided
+            };
+            
             db.ref('games/' + gameNum).set(game, err => {
                 if (err) msg('gamesMsg', 'Create failed', 'err');
                 else {
                     msg('gamesMsg', 'Game created!', 'ok');
                     document.getElementById('newGameNum').value = '';
+                    document.getElementById('newGamePassword').value = '';
                     document.getElementById('newGamePlayers').value = '';
                     loadGames();
+                    loadPlayerGames();
                 }
             });
         }
@@ -502,8 +599,66 @@
                     if (err) msg('gamesMsg', 'Delete failed', 'err');
                     else msg('gamesMsg', 'Game deleted', 'ok');
                     loadGames();
+                    loadPlayerGames();
                 });
             }
+        }
+        
+        let currentEditGameId = null;
+        
+        function editGame(gameId) {
+            currentEditGameId = gameId;
+            db.ref('games/' + gameId).once('value', snapshot => {
+                if (snapshot.exists()) {
+                    const g = snapshot.val();
+                    document.getElementById('editGameNum').textContent = gameId;
+                    document.getElementById('editGameWeeks').value = g.weeks;
+                    document.getElementById('editGamePassword').value = g.password || '';
+                    document.getElementById('editGamePlayers').value = (g.players || []).join('\n');
+                    document.getElementById('editGameSection').style.display = 'block';
+                    
+                    // Scroll to edit section
+                    document.getElementById('editGameSection').scrollIntoView({ behavior: 'smooth' });
+                }
+            });
+        }
+        
+        function saveGameEdit() {
+            if (!currentEditGameId) return;
+            
+            const gameId = currentEditGameId;
+            const weeks = parseInt(document.getElementById('editGameWeeks').value);
+            const password = document.getElementById('editGamePassword').value.trim();
+            const players = document.getElementById('editGamePlayers').value.split('\n').map(p => p.trim()).filter(p => p);
+            
+            if (weeks < 1 || players.length === 0) {
+                msg('gamesMsg', 'Weeks must be at least 1, and add at least 1 player', 'err');
+                return;
+            }
+            
+            const updatedGame = {
+                weeks: weeks,
+                players: players,
+                password: password || null
+            };
+            
+            db.ref('games/' + gameId).set(updatedGame, err => {
+                if (err) {
+                    msg('gamesMsg', 'Save failed', 'err');
+                } else {
+                    msg('gamesMsg', 'Game updated successfully!', 'ok');
+                    currentEditGameId = null;
+                    document.getElementById('editGameSection').style.display = 'none';
+                    loadGames();
+                    loadPlayerGames();
+                    loadAdminGames();
+                }
+            });
+        }
+        
+        function cancelGameEdit() {
+            currentEditGameId = null;
+            document.getElementById('editGameSection').style.display = 'none';
         }
         
         function loadAdminGames() {
@@ -575,7 +730,6 @@
             const week = document.getElementById('adminWeek').value;
             if (!gameId || !player || !week || !db) { msg('adminEntryMsg', 'Select all fields', 'err'); return; }
             
-            // Helper function to parse value or return null if empty
             const parseOrNull = (val, isFloat = false) => {
                 const trimmed = val.trim();
                 if (trimmed === '') return null;
@@ -652,7 +806,6 @@
                 map[e.playerName][e.week] = e;
             });
             
-            // Build clean scoreboard - NO sticky positioning
             let html = '<table style="width:100%; border-collapse:collapse; font-family:Arial,sans-serif;">';
             html += '<thead>';
             html += '<tr>';
@@ -685,25 +838,20 @@
                     
                     html += `<tr style="border-bottom:1px solid #e0e0e0;">`;
                     
-                    // PLAYER column - only for first metric row (rowspan=5)
                     if (metricIdx === 0) {
                         html += `<td style="padding:6px 3px; background:#e8e8e8; font-weight:bold; border-right:2px solid #999; font-size:12px;" rowspan="5">${p}</td>`;
                     }
                     
-                    // METRIC column (gray background)
                     html += `<td style="padding:6px 3px; background:#e8e8e8; font-weight:500; border-right:2px solid #999; font-size:11px;">${metric.display}</td>`;
                     
-                    // Week data columns with alternating background
                     let playerMetricTotal = 0;
                     for (let w = 1; w <= gameConfig.weeks; w++) {
                         const e = map[p] ? map[p][w] : null;
                         let val = e ? e[metric.key] : '-';
-                        // Treat null/undefined as dash
                         if (val === null || val === undefined) val = '-';
                         
                         html += `<td style="padding:6px 3px; text-align:center; background:${dataRowBg}; font-size:12px;">${val}</td>`;
                         
-                        // Conversion % column (only for BELLS row)
                         if (isYesRow && e && e.offer && e.yeses) {
                             const weekConv = (e.yeses / e.offer * 100).toFixed(1) + '%';
                             html += `<td style="padding:6px 3px; text-align:center; background:${dataRowBg}; font-weight:bold; color:#d9534f; font-size:11px;">${weekConv}</td>`;
@@ -713,7 +861,6 @@
                             html += `<td style="padding:6px 3px; text-align:center; background:${dataRowBg};"></td>`;
                         }
                         
-                        // Only add to totals if value exists and is not dash
                         if (val !== '-' && val !== null && val !== undefined && e && e[metric.key] !== null && e[metric.key] !== undefined) {
                             playerMetricTotal += e[metric.key];
                             if (!wTots[w]) wTots[w] = {};
@@ -722,10 +869,8 @@
                         }
                     }
                     
-                    // TOTAL column
                     html += `<td style="padding:6px 3px; text-align:center; background:${dataRowBg}; font-weight:bold; background:#ffffcc; font-size:12px;">${playerMetricTotal}</td>`;
                     
-                    // Total CONVERSION % (only for BELLS row)
                     if (isYesRow) {
                         let totalYeses = 0;
                         let totalOffer = 0;
@@ -745,13 +890,11 @@
                     html += '</tr>';
                 });
                 
-                // Spacer row between players
                 if (playerIdx < players.length - 1) {
                     html += '<tr style="height:8px; background:#f0f0f0;"><td colspan="' + (gameConfig.weeks * 2 + 4) + '"></td></tr>';
                 }
             });
             
-            // TOTALS SECTION - properly aligned with matching cell structure
             html += '<tr style="border-top:3px solid #333;"><td style="padding:6px 3px; font-weight:bold; background:#333; color:white; font-size:12px;" rowspan="5">TOTAL</td><td style="padding:6px 3px; background:#333; color:white;"></td>';
             for (let w = 1; w <= gameConfig.weeks; w++) {
                 html += '<td style="padding:6px 3px; background:#333;"></td><td style="padding:6px 3px; background:#333;"></td>';
@@ -764,7 +907,6 @@
                 
                 html += `<tr style="border-bottom:1px solid #d0d0d0;">`;
                 
-                // For DOLLARS row (last row), add empty cell with BLACK background to shift it right
                 if (metricIdx === 4) {
                     html += `<td style="padding:6px 3px; background:#333;"></td>`;
                 }
@@ -775,7 +917,6 @@
                     const val = (wTots[w] && wTots[w][metric.key]) ? wTots[w][metric.key] : 0;
                     html += `<td style="padding:6px 3px; text-align:center; background:${dataRowBg}; font-weight:bold; font-size:12px;">${val}</td>`;
                     
-                    // Conversion % for BELLS in totals
                     if (isYesRow) {
                         const weekOffers = wTots[w] && wTots[w]['offer'] ? wTots[w]['offer'] : 0;
                         const weekConv = weekOffers > 0 ? (val / weekOffers * 100).toFixed(1) + '%' : '-';
@@ -791,7 +932,6 @@
                 }
                 html += `<td style="padding:6px 3px; text-align:center; font-weight:bold; background:#d9edf7; font-size:12px;">${grandTotal}</td>`;
                 
-                // Grand total conversion for BELLS
                 if (isYesRow) {
                     let totalYeses = 0;
                     let totalOffers = 0;
