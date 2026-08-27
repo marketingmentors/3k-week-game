@@ -128,35 +128,37 @@
                 <div id="playerEntry" class="section active">
                     <h2>Submit Entry</h2>
                     <div id="playerEntryMsg" class="msg"></div>
-                    <div class="grid">
-                        <div class="form-group">
-                            <label>Week</label>
-                            <select id="playerWeek"></select>
-                        </div>
+                    <div class="form-group">
+                        <label>Week</label>
+                        <select id="playerWeek" onchange="playerLoadEntry()"><option value="">Select week</option></select>
                     </div>
-                    <div class="grid">
-                        <div class="form-group"><label>BAIT (content)</label><input type="number" id="content" min="0"></div>
-                        <div class="form-group"><label>KNOCK (outreach)</label><input type="number" id="knock" min="0"></div>
-                        <div class="form-group"><label>DOCS (offer)</label><input type="number" id="offer" min="0"></div>
-                        <div class="form-group"><label>BELLS (yeses)</label><input type="number" id="yeses" min="0"></div>
-                        <div class="form-group"><label>DOLLARS (sales)</label><input type="number" id="dollars" min="0" step="0.01"></div>
+                    <div class="form-group">
+                        <label>BAIT</label>
+                        <input type="number" id="content" min="0">
                     </div>
-                    <button onclick="playerSubmit()">Submit Entry</button>
-                    
-                    <div class="admin-section">
-                        <h3 style="font-size: 16px; margin-bottom: 10px;">Edit Previous Entry</h3>
-                        <p style="margin-bottom: 15px; color: #666; font-size: 13px;">Select a week above to load and edit existing data</p>
-                        <button onclick="playerLoadEntry()" style="background: #6c757d;">Load Entry to Edit</button>
-                        <button onclick="playerUpdateEntry()" style="margin-top: 10px; background: #6c757d;">Save Changes</button>
+                    <div class="form-group">
+                        <label>KNOCK</label>
+                        <input type="number" id="knock" min="0">
                     </div>
+                    <div class="form-group">
+                        <label>DOCS</label>
+                        <input type="number" id="offer" min="0">
+                    </div>
+                    <div class="form-group">
+                        <label>BELLS</label>
+                        <input type="number" id="yeses" min="0">
+                    </div>
+                    <div class="form-group">
+                        <label>DOLLARS</label>
+                        <input type="number" id="dollars" min="0" step="0.01">
+                    </div>
+                    <button onclick="playerSubmit()">Submit</button>
                 </div>
                 
                 <!-- PLAYER DASHBOARD -->
                 <div id="playerDash" class="section">
                     <h2>Dashboard</h2>
-                    <div class="table-wrapper">
-                        <div id="playerDashView"></div>
-                    </div>
+                    <div id="playerDashView"></div>
                 </div>
             </div>
             
@@ -169,208 +171,140 @@
                     <button class="logout" onclick="logout()">Logout</button>
                 </div>
                 
-                <!-- GAMES SECTION -->
+                <!-- ADMIN GAMES -->
                 <div id="adminGames" class="section active">
                     <h2>Manage Games</h2>
                     <div id="gamesMsg" class="msg"></div>
-                    
                     <div class="admin-section">
-                        <h3 style="font-size: 16px; margin-bottom: 20px;">Create New Game</h3>
-                        <div class="grid">
-                            <div class="form-group">
-                                <label>Game Number</label>
-                                <input type="number" id="newGameNum" min="1" placeholder="e.g., 2">
-                            </div>
-                            <div class="form-group">
-                                <label>Number of Weeks</label>
-                                <select id="newGameWeeks">
-                                    <option value="1">1 Week</option>
-                                    <option value="2">2 Weeks</option>
-                                    <option value="3">3 Weeks</option>
-                                    <option value="4">4 Weeks</option>
-                                    <option value="5">5 Weeks</option>
-                                    <option value="6">6 Weeks</option>
-                                    <option value="7">7 Weeks</option>
-                                    <option value="8">8 Weeks</option>
-                                </select>
-                            </div>
-                        </div>
-                        
+                        <h3>Create New Game</h3>
                         <div class="form-group">
-                            <label>Add Player Names (one per line)</label>
-                            <textarea id="newGamePlayers" placeholder="April&#10;Diane&#10;Dori&#10;Donna" style="height: 120px; resize: vertical;"></textarea>
+                            <label>Game Number</label>
+                            <input type="number" id="newGameNum" min="1">
                         </div>
-                        
+                        <div class="form-group">
+                            <label>Number of Weeks</label>
+                            <input type="number" id="newGameWeeks" min="1" max="8" value="6">
+                        </div>
+                        <div class="form-group">
+                            <label>Player Names (one per line)</label>
+                            <textarea id="newGamePlayers" rows="8" placeholder="Alice&#10;Bob&#10;Charlie"></textarea>
+                        </div>
                         <button onclick="createGame()">Create Game</button>
                     </div>
-                    
-                    <h3 style="margin-top: 30px; margin-bottom: 15px;">Existing Games</h3>
-                    <div id="gamesList"></div>
+                    <div>
+                        <h3>Games</h3>
+                        <div id="gamesList"></div>
+                    </div>
                 </div>
                 
-                <!-- ENTRY SECTION -->
+                <!-- ADMIN ENTRY -->
                 <div id="adminEntry" class="section">
-                    <h2>Edit Player Entry</h2>
+                    <h2>Edit Entry</h2>
                     <div id="adminEntryMsg" class="msg"></div>
-                    <div class="grid">
-                        <div class="form-group">
-                            <label>Game</label>
-                            <select id="adminGameSelect" onchange="updateAdminPlayerList()">
-                                <option value="">Select game</option>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label>Player</label>
-                            <select id="adminPlayerSelect"></select>
-                        </div>
-                        <div class="form-group">
-                            <label>Week</label>
-                            <select id="adminWeek"></select>
-                        </div>
+                    <div class="form-group">
+                        <label>Game</label>
+                        <select id="adminGameSelect" onchange="loadAdminPlayers()"><option value="">Select game</option></select>
                     </div>
-                    <button onclick="adminLoadEntry()" style="background: #6c757d;">Load Entry</button>
-                    
-                    <div class="grid" style="margin-top: 20px;">
-                        <div class="form-group"><label>BAIT (content)</label><input type="number" id="adminContent" min="0"></div>
-                        <div class="form-group"><label>KNOCK (outreach)</label><input type="number" id="adminKnock" min="0"></div>
-                        <div class="form-group"><label>DOCS (offer)</label><input type="number" id="adminOffer" min="0"></div>
-                        <div class="form-group"><label>BELLS (yeses)</label><input type="number" id="adminYeses" min="0"></div>
-                        <div class="form-group"><label>DOLLARS (sales)</label><input type="number" id="adminDollars" min="0" step="0.01"></div>
+                    <div class="form-group">
+                        <label>Player</label>
+                        <select id="adminPlayerSelect"></select>
                     </div>
-                    <button onclick="adminSaveEntry()" style="background: #6c757d;">Save Entry</button>
+                    <div class="form-group">
+                        <label>Week</label>
+                        <select id="adminWeek"><option value="">Select week</option></select>
+                    </div>
+                    <button onclick="adminLoadEntry()">Load Entry</button>
+                    <div style="margin-top: 20px;">
+                        <div class="form-group">
+                            <label>BAIT</label>
+                            <input type="number" id="adminContent" min="0">
+                        </div>
+                        <div class="form-group">
+                            <label>KNOCK</label>
+                            <input type="number" id="adminKnock" min="0">
+                        </div>
+                        <div class="form-group">
+                            <label>DOCS</label>
+                            <input type="number" id="adminOffer" min="0">
+                        </div>
+                        <div class="form-group">
+                            <label>BELLS</label>
+                            <input type="number" id="adminYeses" min="0">
+                        </div>
+                        <div class="form-group">
+                            <label>DOLLARS</label>
+                            <input type="number" id="adminDollars" min="0" step="0.01">
+                        </div>
+                        <button onclick="adminSaveEntry()">Save Entry</button>
+                    </div>
                 </div>
                 
-                <!-- DASHBOARD SECTION -->
+                <!-- ADMIN DASHBOARD -->
                 <div id="adminDash" class="section">
                     <h2>Dashboard</h2>
                     <div class="form-group">
                         <label>Select Game</label>
-                        <select id="dashGameSelect" onchange="loadAdminDash()">
-                            <option value="">Select game</option>
-                        </select>
+                        <select id="dashGameSelect" onchange="loadAdminDash()"><option value="">Select game</option></select>
                     </div>
-                    <div class="table-wrapper">
-                        <div id="adminDashView"></div>
-                    </div>
+                    <div id="adminDashView"></div>
                 </div>
             </div>
         </div>
     </div>
-    
+
     <script>
-        // Firebase Config
+        const ADMIN_PASSWORD = "Mm@3kWeek$Game!!";
         const firebaseConfig = {
             apiKey: "AIzaSyCnMlbwTUqkrJthbWhpVB7kn-Ef0VRu22o",
-            authDomain: "k-week-game-mm.firebaseapp.com",
-            projectId: "k-week-game-mm",
-            storageBucket: "k-week-game-mm.firebasestorage.app",
-            messagingSenderId: "210316944575",
-            appId: "1:210316944575:web:380066594c570c5867120a",
             databaseURL: "https://k-week-game-mm-default-rtdb.firebaseio.com"
         };
         
-        let db = null;
-        try {
-            firebase.initializeApp(firebaseConfig);
-            db = firebase.database();
-        } catch (e) {
-            console.log('Firebase error:', e);
-        }
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.database();
         
-        // Local state
-        const ADMIN_PASSWORD = "Mm@3kWeek$Game!!";
-        let isAdmin = false;
-        let playerGameId = null;
-        let playerName = null;
-        let playerWeeks = 0;
+        let playerGameId, playerName, playerWeeks;
         
-        // Initialize
-        window.addEventListener('load', () => {
-            const auth = sessionStorage.getItem('auth');
-            if (auth === 'admin') {
-                show('adminApp');
-                loadGamesForAdmin();
-            } else if (auth === 'player') {
-                show('playerApp');
-                playerGameId = sessionStorage.getItem('playerGameId');
-                playerName = sessionStorage.getItem('playerName');
-                playerWeeks = sessionStorage.getItem('playerWeeks');
-                loadPlayerWeeks();
-                document.getElementById('playerGameDisplay').textContent = 'Game ' + sessionStorage.getItem('playerGameNum');
-                document.getElementById('playerNameDisplay').textContent = playerName;
+        // GENERAL
+        function msg(id, text, type) {
+            const el = document.getElementById(id);
+            if (el) {
+                el.textContent = text;
+                el.className = 'msg show ' + type;
+                setTimeout(() => el.classList.remove('show'), 2000);
             }
-            loadGamesForPlayers();
-        });
-        
-        // UI FUNCTIONS
-        function show(id) {
-            document.querySelectorAll('.screen').forEach(e => e.classList.remove('active'));
-            document.getElementById(id).classList.add('active');
         }
         
-        function playerTab(id) {
-            document.querySelectorAll('#playerApp .section').forEach(e => e.classList.remove('active'));
-            if (id === 'entry') document.getElementById('playerEntry').classList.add('active');
-            if (id === 'dash') {
-                document.getElementById('playerDash').classList.add('active');
-                loadPlayerDash();
-            }
-            document.querySelectorAll('#playerApp .nav button').forEach(e => e.classList.remove('active'));
-            event.target.classList.add('active');
-        }
-        
-        function adminTab(id) {
-            document.querySelectorAll('#adminApp .section').forEach(e => e.classList.remove('active'));
-            if (id === 'games') document.getElementById('adminGames').classList.add('active');
-            if (id === 'entry') {
-                document.getElementById('adminEntry').classList.add('active');
-                loadGamesForAdminEntry();
-            }
-            if (id === 'dash') {
-                document.getElementById('adminDash').classList.add('active');
-                loadGamesForAdminDash();
-            }
-            document.querySelectorAll('#adminApp .nav button').forEach(e => e.classList.remove('active'));
-            event.target.classList.add('active');
-        }
-        
-        function msg(el, txt, type) {
-            const m = document.getElementById(el);
-            m.textContent = txt;
-            m.className = 'msg show ' + type;
-        }
-        
-        // LOGIN
-        function loadGamesForPlayers() {
-            if (!db) return;
+        // PLAYER LOGIN
+        function loadPlayerGames() {
+            const sel = document.getElementById('playerGameSelect');
             db.ref('games').once('value', snapshot => {
-                let opts = '<option value="">Select game</option>';
+                let html = '<option value="">Select game</option>';
                 if (snapshot.exists()) {
                     const games = snapshot.val();
-                    Object.keys(games).sort().forEach(gameId => {
-                        const g = games[gameId];
-                        opts += `<option value="${gameId}">${g.num}</option>`;
+                    Object.keys(games).sort((a,b) => parseInt(a) - parseInt(b)).forEach(id => {
+                        html += `<option value="${id}">Game ${id}</option>`;
                     });
                 }
-                document.getElementById('playerGameSelect').innerHTML = opts;
+                sel.innerHTML = html;
             });
         }
         
         function loadPlayerNames() {
             const gameId = document.getElementById('playerGameSelect').value;
-            if (!gameId || !db) { document.getElementById('playerNameSelect').innerHTML = '<option value="">Select name</option>'; return; }
+            const sel = document.getElementById('playerNameSelect');
+            if (!gameId) { sel.innerHTML = '<option value="">Select name</option>'; return; }
             
             db.ref('games/' + gameId).once('value', snapshot => {
+                let html = '<option value="">Select name</option>';
                 if (snapshot.exists()) {
                     const g = snapshot.val();
-                    let opts = '<option value="">Select name</option>';
-                    if (g.players && g.players.length) {
+                    if (g.players) {
                         g.players.forEach(p => {
-                            opts += `<option value="${p}">${p}</option>`;
+                            html += `<option value="${p}">${p}</option>`;
                         });
                     }
-                    document.getElementById('playerNameSelect').innerHTML = opts;
                 }
+                sel.innerHTML = html;
             });
         }
         
@@ -378,50 +312,23 @@
             const gameId = document.getElementById('playerGameSelect').value;
             const name = document.getElementById('playerNameSelect').value;
             if (!gameId || !name) { msg('loginMsg', 'Select game and name', 'err'); return; }
-            if (!db) { msg('loginMsg', 'Firebase not ready', 'err'); return; }
             
             db.ref('games/' + gameId).once('value', snapshot => {
                 if (snapshot.exists()) {
                     const g = snapshot.val();
-                    sessionStorage.setItem('auth', 'player');
-                    sessionStorage.setItem('playerGameId', gameId);
-                    sessionStorage.setItem('playerGameNum', g.num);
-                    sessionStorage.setItem('playerName', name);
-                    sessionStorage.setItem('playerWeeks', g.weeks);
                     playerGameId = gameId;
                     playerName = name;
                     playerWeeks = g.weeks;
-                    show('playerApp');
-                    loadPlayerWeeks();
-                    document.getElementById('playerGameDisplay').textContent = 'Game ' + g.num;
+                    document.getElementById('playerGameDisplay').textContent = gameId;
                     document.getElementById('playerNameDisplay').textContent = name;
+                    loadPlayerWeeks();
+                    loadPlayerDash();
+                    showScreen('playerApp');
                 }
             });
         }
         
-        function adminLogin() {
-            const pwd = document.getElementById('adminPassword').value;
-            if (pwd !== ADMIN_PASSWORD) { msg('loginMsg', 'Incorrect password', 'err'); return; }
-            sessionStorage.setItem('auth', 'admin');
-            isAdmin = true;
-            show('adminApp');
-            loadGamesForAdmin();
-        }
-        
-        function logout() {
-            sessionStorage.removeItem('auth');
-            sessionStorage.removeItem('playerGameId');
-            sessionStorage.removeItem('playerGameNum');
-            sessionStorage.removeItem('playerName');
-            sessionStorage.removeItem('playerWeeks');
-            document.getElementById('adminPassword').value = '';
-            show('login');
-            hideAdminLogin();
-            isAdmin = false;
-            playerGameId = null;
-            playerName = null;
-        }
-        
+        // ADMIN LOGIN
         function showAdminLogin() {
             document.getElementById('adminLoginBox').style.display = 'block';
         }
@@ -430,140 +337,44 @@
             document.getElementById('adminLoginBox').style.display = 'none';
         }
         
-        // ADMIN GAMES
-        function createGame() {
-            console.log('Create game clicked');
-            console.log('DB ready:', db ? 'yes' : 'no');
-            
-            if (!db) { 
-                msg('gamesMsg', 'Firebase not connected - check browser console', 'err'); 
-                console.error('Firebase DB not initialized');
-                return; 
-            }
-            
-            const num = document.getElementById('newGameNum').value;
-            const weeks = document.getElementById('newGameWeeks').value;
-            const playersText = document.getElementById('newGamePlayers').value;
-            
-            console.log('Game Num:', num, 'Weeks:', weeks, 'Players:', playersText);
-            
-            if (!num || !weeks || !playersText) { 
-                msg('gamesMsg', 'Fill all fields (Game #, Weeks, Player names)', 'err'); 
-                return; 
-            }
-            
-            const players = playersText.split('\n').map(p => p.trim()).filter(p => p);
-            console.log('Parsed players:', players);
-            
-            if (players.length === 0) { 
-                msg('gamesMsg', 'Add at least one player (one name per line)', 'err'); 
-                return; 
-            }
-            
-            const gameId = 'game-' + Date.now();
-            const game = { num: parseInt(num), weeks: parseInt(weeks), players };
-            
-            console.log('Saving game:', gameId, game);
-            
-            db.ref('games/' + gameId).set(game, function(err) {
-                if (err) { 
-                    console.error('Firebase error:', err);
-                    msg('gamesMsg', 'Save failed: ' + err.message, 'err'); 
-                }
-                else {
-                    console.log('Game saved successfully');
-                    msg('gamesMsg', 'Game created!', 'ok');
-                    document.getElementById('newGameNum').value = '';
-                    document.getElementById('newGameWeeks').value = '6';
-                    document.getElementById('newGamePlayers').value = '';
-                    loadGamesForAdmin();
-                    loadGamesForPlayers();
-                }
-            });
-        }
-        
-        function loadGamesForAdmin() {
-            if (!db) return;
-            db.ref('games').on('value', snapshot => {
-                let html = '';
-                if (snapshot.exists()) {
-                    const games = snapshot.val();
-                    Object.keys(games).sort().forEach(gameId => {
-                        const g = games[gameId];
-                        html += `<div class="item-box">
-                            <div>
-                                <strong>Game ${g.num}</strong> - ${g.weeks} weeks, ${g.players.length} players
-                                <div style="font-size: 12px; color: #666; margin-top: 5px;">${g.players.join(', ')}</div>
-                            </div>
-                            <button class="btn-delete" onclick="deleteGame('${gameId}')">Delete</button>
-                        </div>`;
-                    });
-                }
-                document.getElementById('gamesList').innerHTML = html || '<p>No games yet</p>';
-            });
-        }
-        
-        function deleteGame(gameId) {
-            if (confirm('Delete this game?')) {
-                db.ref('games/' + gameId).remove(err => {
-                    if (err) msg('gamesMsg', 'Delete failed', 'err');
-                    else msg('gamesMsg', 'Game deleted', 'ok');
-                });
+        function adminLogin() {
+            const pwd = document.getElementById('adminPassword').value;
+            if (pwd === ADMIN_PASSWORD) {
+                loadGames();
+                showScreen('adminApp');
+            } else {
+                msg('loginMsg', 'Wrong password', 'err');
             }
         }
         
-        function loadGamesForAdminEntry() {
-            if (!db) return;
-            db.ref('games').once('value', snapshot => {
-                let opts = '<option value="">Select game</option>';
-                if (snapshot.exists()) {
-                    const games = snapshot.val();
-                    Object.keys(games).sort().forEach(gameId => {
-                        const g = games[gameId];
-                        opts += `<option value="${gameId}">Game ${g.num}</option>`;
-                    });
-                }
-                document.getElementById('adminGameSelect').innerHTML = opts;
-            });
+        // SCREENS
+        function showScreen(id) {
+            document.querySelectorAll('.screen').forEach(el => el.classList.remove('active'));
+            document.getElementById(id).classList.add('active');
         }
         
-        function loadGamesForAdminDash() {
-            if (!db) return;
-            db.ref('games').once('value', snapshot => {
-                let opts = '<option value="">Select game</option>';
-                if (snapshot.exists()) {
-                    const games = snapshot.val();
-                    Object.keys(games).sort().forEach(gameId => {
-                        const g = games[gameId];
-                        opts += `<option value="${gameId}">Game ${g.num}</option>`;
-                    });
-                }
-                document.getElementById('dashGameSelect').innerHTML = opts;
-            });
+        function playerTab(tab) {
+            document.querySelectorAll('#playerApp .section').forEach(el => el.classList.remove('active'));
+            document.getElementById('playerEntry').classList.toggle('active', tab === 'entry');
+            document.getElementById('playerDash').classList.toggle('active', tab === 'dash');
+            document.querySelectorAll('#playerApp .nav button').forEach((el, i) => el.classList.toggle('active', (i === 0 && tab === 'entry') || (i === 1 && tab === 'dash')));
+            if (tab === 'dash') loadPlayerDash();
         }
         
-        function updateAdminPlayerList() {
-            const gameId = document.getElementById('adminGameSelect').value;
-            if (!gameId || !db) { document.getElementById('adminPlayerSelect').innerHTML = '<option value="">Select player</option>'; return; }
-            
-            db.ref('games/' + gameId).once('value', snapshot => {
-                if (snapshot.exists()) {
-                    const g = snapshot.val();
-                    let opts = '<option value="">Select player</option>';
-                    if (g.players) {
-                        g.players.forEach(p => {
-                            opts += `<option value="${p}">${p}</option>`;
-                        });
-                    }
-                    document.getElementById('adminPlayerSelect').innerHTML = opts;
-                    
-                    let weekOpts = '<option value="">Select week</option>';
-                    for (let i = 1; i <= g.weeks; i++) {
-                        weekOpts += `<option value="${i}">Week ${i}</option>`;
-                    }
-                    document.getElementById('adminWeek').innerHTML = weekOpts;
-                }
-            });
+        function adminTab(tab) {
+            document.querySelectorAll('#adminApp .section').forEach(el => el.classList.remove('active'));
+            document.getElementById('adminGames').classList.toggle('active', tab === 'games');
+            document.getElementById('adminEntry').classList.toggle('active', tab === 'entry');
+            document.getElementById('adminDash').classList.toggle('active', tab === 'dash');
+            document.querySelectorAll('#adminApp .nav button').forEach((el, i) => el.classList.toggle('active', (i === 0 && tab === 'games') || (i === 1 && tab === 'entry') || (i === 2 && tab === 'dash')));
+            if (tab === 'games') loadGames();
+            if (tab === 'entry') loadAdminGames();
+            if (tab === 'dash') loadAdminGames();
+        }
+        
+        function logout() {
+            showScreen('login');
+            document.getElementById('adminPassword').value = '';
         }
         
         // PLAYER ENTRY
@@ -627,11 +438,11 @@
             db.ref('entries/' + key).once('value', snapshot => {
                 if (snapshot.exists()) {
                     const e = snapshot.val();
-                    document.getElementById('content').value = e.content;
-                    document.getElementById('knock').value = e.knock;
-                    document.getElementById('offer').value = e.offer;
-                    document.getElementById('yeses').value = e.yeses;
-                    document.getElementById('dollars').value = e.dollars;
+                    document.getElementById('content').value = e.content || '';
+                    document.getElementById('knock').value = e.knock || '';
+                    document.getElementById('offer').value = e.offer || '';
+                    document.getElementById('yeses').value = e.yeses || '';
+                    document.getElementById('dollars').value = e.dollars || '';
                     msg('playerEntryMsg', 'Entry loaded', 'ok');
                 } else {
                     msg('playerEntryMsg', 'No entry found', 'err');
@@ -639,11 +450,91 @@
             });
         }
         
-        function playerUpdateEntry() {
-            playerSubmit();
+        // ADMIN GAMES
+        function loadGames() {
+            db.ref('games').once('value', snapshot => {
+                let html = '';
+                if (snapshot.exists()) {
+                    const games = snapshot.val();
+                    Object.keys(games).sort((a,b) => parseInt(a) - parseInt(b)).forEach(id => {
+                        const g = games[id];
+                        html += `<div class="item-box"><strong>Game ${id}</strong> (${g.weeks} weeks, ${g.players ? g.players.length : 0} players) <button class="btn-delete" onclick="deleteGame('${id}')">Delete</button></div>`;
+                    });
+                }
+                document.getElementById('gamesList').innerHTML = html || 'No games yet';
+            });
         }
         
-        // ADMIN ENTRY
+        function createGame() {
+            const gameNum = document.getElementById('newGameNum').value;
+            const weeks = parseInt(document.getElementById('newGameWeeks').value);
+            const players = document.getElementById('newGamePlayers').value.split('\n').map(p => p.trim()).filter(p => p);
+            
+            if (!gameNum || weeks < 1 || players.length === 0) { msg('gamesMsg', 'Fill all fields', 'err'); return; }
+            
+            const game = { weeks: weeks, players: players };
+            db.ref('games/' + gameNum).set(game, err => {
+                if (err) msg('gamesMsg', 'Create failed', 'err');
+                else {
+                    msg('gamesMsg', 'Game created!', 'ok');
+                    document.getElementById('newGameNum').value = '';
+                    document.getElementById('newGamePlayers').value = '';
+                    loadGames();
+                }
+            });
+        }
+        
+        function deleteGame(id) {
+            if (confirm('Delete Game ' + id + '?')) {
+                db.ref('games/' + id).remove(err => {
+                    if (err) msg('gamesMsg', 'Delete failed', 'err');
+                    else msg('gamesMsg', 'Game deleted', 'ok');
+                    loadGames();
+                });
+            }
+        }
+        
+        function loadAdminGames() {
+            const sel = document.getElementById('adminGameSelect');
+            const sel2 = document.getElementById('dashGameSelect');
+            db.ref('games').once('value', snapshot => {
+                let html = '<option value="">Select game</option>';
+                if (snapshot.exists()) {
+                    const games = snapshot.val();
+                    Object.keys(games).sort((a,b) => parseInt(a) - parseInt(b)).forEach(id => {
+                        html += `<option value="${id}">Game ${id}</option>`;
+                    });
+                }
+                sel.innerHTML = html;
+                sel2.innerHTML = html;
+            });
+        }
+        
+        function loadAdminPlayers() {
+            const gameId = document.getElementById('adminGameSelect').value;
+            const sel = document.getElementById('adminPlayerSelect');
+            if (!gameId) { sel.innerHTML = '<option value="">Select player</option>'; return; }
+            
+            db.ref('games/' + gameId).once('value', snapshot => {
+                let html = '<option value="">Select player</option>';
+                if (snapshot.exists()) {
+                    const g = snapshot.val();
+                    if (g.players) {
+                        g.players.forEach(p => {
+                            html += `<option value="${p}">${p}</option>`;
+                        });
+                    }
+                    const weekSel = document.getElementById('adminWeek');
+                    let weekHtml = '<option value="">Select week</option>';
+                    for (let i = 1; i <= g.weeks; i++) {
+                        weekHtml += `<option value="${i}">Week ${i}</option>`;
+                    }
+                    weekSel.innerHTML = weekHtml;
+                }
+                sel.innerHTML = html;
+            });
+        }
+        
         function adminLoadEntry() {
             const gameId = document.getElementById('adminGameSelect').value;
             const player = document.getElementById('adminPlayerSelect').value;
@@ -654,11 +545,11 @@
             db.ref('entries/' + key).once('value', snapshot => {
                 if (snapshot.exists()) {
                     const e = snapshot.val();
-                    document.getElementById('adminContent').value = e.content;
-                    document.getElementById('adminKnock').value = e.knock;
-                    document.getElementById('adminOffer').value = e.offer;
-                    document.getElementById('adminYeses').value = e.yeses;
-                    document.getElementById('adminDollars').value = e.dollars;
+                    document.getElementById('adminContent').value = e.content || '';
+                    document.getElementById('adminKnock').value = e.knock || '';
+                    document.getElementById('adminOffer').value = e.offer || '';
+                    document.getElementById('adminYeses').value = e.yeses || '';
+                    document.getElementById('adminDollars').value = e.dollars || '';
                     msg('adminEntryMsg', 'Entry loaded', 'ok');
                 } else {
                     msg('adminEntryMsg', 'No entry found', 'err');
@@ -828,7 +719,7 @@
                         let totalOffer = 0;
                         for (let w = 1; w <= gameConfig.weeks; w++) {
                             const e = map[p] ? map[p][w] : null;
-                            if (e) {
+                            if (e && e.yeses !== null && e.yeses !== undefined && e.offer !== null && e.offer !== undefined) {
                                 totalYeses += e.yeses;
                                 totalOffer += e.offer;
                             }
