@@ -376,8 +376,14 @@
         }
         
         function logout() {
-            showScreen('login');
+            playerGameId = null;
+            playerName = null;
+            playerWeeks = null;
+            clearPlayerFields();
             document.getElementById('adminPassword').value = '';
+            document.getElementById('playerGameSelect').value = '';
+            document.getElementById('playerNameSelect').value = '';
+            showScreen('login');
         }
         
         // PLAYER ENTRY
